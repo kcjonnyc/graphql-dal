@@ -1,12 +1,13 @@
 {
-  "id": 90804,
-  "variants": [
-    {
-      "status": 1,
-      "upc": "184125436A",
-      "externalId": "184125436A",
-      "images": [],
+    "90804": {
+        "id": 90804,
+        "variants": [
+        {
+            "status": 1,
+            "upc": "184125436A",
+            "externalId": "184125436A",
+            "images": []
+        }],
+        "topCategory": 1
     }
-  ],
-  "topCategory": 1
 }

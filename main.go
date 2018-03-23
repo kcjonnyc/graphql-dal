@@ -4,16 +4,14 @@ import (
 	"net/http"
 	"io/ioutil"
 	"fmt"
+	"log"
 	"github.com/graphql-go/graphql"
 	"encoding/json"
-	"golang.org/x/net/context"
-	"github.com/pressly/chi"
 )
-
 
 type Variant struct {
 	Status int `json:"status"`
-	Upc int `json:"upc"`
+	Upc string `json:"upc"`
 	ExternalId string `json:"externalId"`
 	Images []string `json:"images"`
 }
@@ -24,7 +22,7 @@ type Product struct {
 	TopCategory int `json:"topCategory"`
 }
 
-var data map[int]*Product
+var data map[string]*Product
 // GraphQL
 
 var variantType = graphql.NewObject(
@@ -35,12 +33,12 @@ var variantType = graphql.NewObject(
 				Type: graphql.Int,
 			},
 			"upc": &graphql.Field{
-				Type: graphql.Int,
+				Type: graphql.String,
 			},
 			"externalId": &graphql.Field{
 				Type: graphql.String,
 			},
-			"images:" &graphql.Field{
+			"images": &graphql.Field{
 				Type: graphql.NewList(graphql.String),
 			},
 		},
@@ -70,11 +68,11 @@ var queryType = graphql.NewObject(
 				Type: productType,
 				Args: graphql.FieldConfigArgument{
 					"id": &graphql.ArgumentConfig{
-						Type: graphql.Int,
+						Type: graphql.String,
 					},
 				},
 				Resolve: func(product graphql.ResolveParams) (interface{}, error) {
-					id, ok := product.Args["id"].(int)
+					id, ok := product.Args["id"].(string)
 					if ok {
 						return data[id], nil
 					}
@@ -91,32 +89,17 @@ var schema, _ = graphql.NewSchema(
 	},
 )
 
-func serveGraphQL (ctx context.Context, w http.ResponseWriter,r *http.Request) {
-	// execute GraphQL query
-	params := graphql.Params {
-			Schema: schema,
-			Context: ctx,
-			RequestString: r.URL.Query().Get("query"),
-	}
-	result := graphql.Do(params)
+func executeQuery(query string, schema graphql.Schema) *graphql.Result {
+	result := graphql.Do(graphql.Params{
+		Schema:        schema,
+		RequestString: query,
+	})
 	if len(result.Errors) > 0 {
-		fmt.Printf("errors : %v", result.Errors)
+		fmt.Printf("wrong result, unexpected errors: %v", result.Errors)
 	}
-	json.NewEncoder(w).Encode(result)
+	return result
 }
 
-
-func main() {
-	err := openJsonFile("example_product.json", &data)
-	if err != nil {
-		return
-	}
-	r := chi.NewRouter()
-	r.Handle("/graphql", serveGraphQL)
-	http.ListenAndServe(":3000", r)
-}
-
-// helper
 func openJsonFile(name string, p interface{}) (err error) {
 	content, err := ioutil.ReadFile(name)
 	if err != nil {
@@ -126,5 +109,18 @@ func openJsonFile(name string, p interface{}) (err error) {
 	if err != nil {
 		return err
 	}
-	return err
+	return nil
+}
+
+func main() {
+	err := openJsonFile("example_product.json", &data)
+	if err != nil {
+		log.Fatalf("Error loading data")
+	}
+	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
+		result := executeQuery(r.URL.Query().Get("query"), schema)
+		json.NewEncoder(w).Encode(result)
+	})
+	fmt.Println("Now server is running on port 8080")
+	http.ListenAndServe(":8080", nil)
 }
