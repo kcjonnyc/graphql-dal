@@ -24,20 +24,20 @@ type Product struct {
 
 var data map[string]*Product
 
-var variantType = graphql.NewObject(
-	graphql.ObjectConfig{
+var variantType = graphql.NewInputObject(
+	graphql.InputObjectConfig{
 		Name: "Variant",
-		Fields: graphql.Fields{
-			"status": &graphql.Field{
+		Fields: graphql.InputObjectConfigFieldMap{
+			"status": &graphql.InputObjectFieldConfig{
 				Type: graphql.Int,
 			},
-			"upc": &graphql.Field{
+			"upc": &graphql.InputObjectFieldConfig{
 				Type: graphql.String,
 			},
-			"externalId": &graphql.Field{
+			"externalId": &graphql.InputObjectFieldConfig{
 				Type: graphql.String,
 			},
-			"images": &graphql.Field{
+			"images": &graphql.InputObjectFieldConfig{
 				Type: graphql.NewList(graphql.String),
 			},
 		},
@@ -153,12 +153,13 @@ var productMutation = graphql.NewObject(
 					id, ok := p.Args["id"].(string)
 					if ok {
 						product := data[id]
-						variant, ok := p.Args["variant"].(Variant)
+						//variantMap := p.Args["variant"].(map[string]{})
+						//status, ok := variantMap["stauts"].(int)
 						log.Printf("%v", p.Args)
-						if ok {
-							log.Println("variant")
-							product.Variant.Status = variant.Status
-						}
+						/*if ok {
+							log.Printf("test")
+							product.Variant.Status = status
+						}*/
 						topCategory, ok := p.Args["topCategory"].(int)
 						if ok {
 							product.TopCategory = topCategory
