@@ -1,29 +1,28 @@
 package main
 
 import (
-	"net/http"
-	"io/ioutil"
-	"fmt"
-	"log"
-	"github.com/graphql-go/graphql"
 	"encoding/json"
+	"fmt"
+	"github.com/graphql-go/graphql"
+	"io/ioutil"
+	"log"
+	"net/http"
 )
 
 type Variant struct {
-	Status int `json:"status"`
-	Upc string `json:"upc"`
-	ExternalId string `json:"externalId"`
-	Images []string `json:"images"`
+	Status     int      `json:"status"`
+	Upc        string   `json:"upc"`
+	ExternalId string   `json:"externalId"`
+	Images     []string `json:"images"`
 }
 
 type Product struct {
-	Id int `json:"id"`
-	Variants []*Variant `json:"variants"`
-	TopCategory int `json:"topCategory"`
+	Id          int        `json:"id"`
+	Variants    []*Variant `json:"variants"`
+	TopCategory int        `json:"topCategory"`
 }
 
 var data map[string]*Product
-// GraphQL
 
 var variantType = graphql.NewObject(
 	graphql.ObjectConfig{
@@ -42,7 +41,7 @@ var variantType = graphql.NewObject(
 				Type: graphql.NewList(graphql.String),
 			},
 		},
-})
+	})
 
 var productType = graphql.NewObject(
 	graphql.ObjectConfig{
@@ -58,7 +57,7 @@ var productType = graphql.NewObject(
 				Type: graphql.Int,
 			},
 		},
-})
+	})
 
 var queryType = graphql.NewObject(
 	graphql.ObjectConfig{
@@ -78,9 +77,9 @@ var queryType = graphql.NewObject(
 					}
 					return nil, nil
 				},
+			},
 		},
-	},
-})
+	})
 
 var schema, _ = graphql.NewSchema(
 	graphql.SchemaConfig{
