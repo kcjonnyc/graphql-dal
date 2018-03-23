@@ -121,10 +121,27 @@ var productMutation = graphql.NewObject(
 					id, ok := p.Args["id"].(string)
 					if ok {
 						product := data[id]
-						variantMap := p.Args["variant"].(map[string]interface{})
-						status, ok := variantMap["status"].(int)
+						variantMap, ok := p.Args["variant"].(map[string]interface{})
 						if ok {
-							product.Variant.Status = status
+							status, ok := variantMap["status"].(int)
+							if ok {
+								product.Variant.Status = status
+							}
+							upc, ok := variantMap["upc"].(string)
+							if ok {
+								product.Variant.Upc = upc
+							}
+							externalId, ok := variantMap["externalId"].(string)
+							if ok {
+								product.Variant.ExternalId = externalId
+							}
+							imageInterface, ok := variantMap["images"].([]interface{})
+							if ok {
+								product.Variant.Images = product.Variant.Images[:0]
+								for _, value := range imageInterface {
+									product.Variant.Images = append(product.Variant.Images, value.(string))
+								}
+							}
 						}
 						topCategory, ok := p.Args["topCategory"].(int)
 						if ok {
