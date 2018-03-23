@@ -17,14 +17,14 @@ type Variant struct {
 }
 
 type Product struct {
-	Id          int        `json:"id"`
-	Variant     *Variant   `json:"variant"`
-	TopCategory int        `json:"topCategory"`
+	Id          int      `json:"id"`
+	Variant     *Variant `json:"variant"`
+	TopCategory int      `json:"topCategory"`
 }
 
 var data map[string]*Product
 
-var variantType = graphql.NewInputObject(
+var variantInputType = graphql.NewInputObject(
 	graphql.InputObjectConfig{
 		Name: "Variant",
 		Fields: graphql.InputObjectConfigFieldMap{
@@ -38,6 +38,25 @@ var variantType = graphql.NewInputObject(
 				Type: graphql.String,
 			},
 			"images": &graphql.InputObjectFieldConfig{
+				Type: graphql.NewList(graphql.String),
+			},
+		},
+	})
+
+var variantType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "Variant",
+		Fields: graphql.Fields{
+			"status": &graphql.Field{
+				Type: graphql.Int,
+			},
+			"upc": &graphql.Field{
+				Type: graphql.String,
+			},
+			"externalId": &graphql.Field{
+				Type: graphql.String,
+			},
+			"images": &graphql.Field{
 				Type: graphql.NewList(graphql.String),
 			},
 		},
@@ -81,57 +100,6 @@ var queryType = graphql.NewObject(
 		},
 	})
 
-/*var variantMutation = graphql.NewObject(
-	graphql.ObjectConfig{
-		Name: "variantMutation",
-		Fields: graphql.Fields{
-			"variant": &graphql.Field{
-				Type: variantType,
-				Args: graphql.FieldConfigArgument{
-					"id": &graphql.ArgumentConfig{
-						Type: graphql.String,
-					},
-					"status": &graphql.ArgumentConfig{
-						Type: graphql.Int,
-					},
-					"upc": &graphql.ArgumentConfig{
-						Type: graphql.String,
-					},
-					"externalId": &graphql.ArgumentConfig{
-						Type: graphql.String,
-					},
-					"images": &graphql.ArgumentConfig{
-						Type: graphql.NewList(graphql.String),
-					},
-				},
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					id, ok := p.Args["id"].(string)
-					if ok {
-						product := data[id]
-						status, ok := p.Args["status"].(int)
-						if ok {
-							product.Variant.Status = status
-						}
-						upc, ok := p.Args["upc"].(string)
-						if ok {
-							product.Variant.Upc = upc
-						}
-						externalId, ok := p.Args["externalId"].(string)
-						if ok {
-							product.Variant.ExternalId = externalId
-						}
-						images, ok := p.Args["images"].([]string)
-						if ok {
-							product.Variant.Images = images
-						}
-						return product.Variant, nil
-					}
-					return nil, nil
-				},
-			},
-		},
-	})*/
-
 var productMutation = graphql.NewObject(
 	graphql.ObjectConfig{
 		Name: "productMutation",
@@ -143,7 +111,7 @@ var productMutation = graphql.NewObject(
 						Type: graphql.String,
 					},
 					"variant": &graphql.ArgumentConfig{
-						Type: variantType,
+						Type: variantInputType,
 					},
 					"topCategory": &graphql.ArgumentConfig{
 						Type: graphql.Int,
@@ -153,13 +121,11 @@ var productMutation = graphql.NewObject(
 					id, ok := p.Args["id"].(string)
 					if ok {
 						product := data[id]
-						//variantMap := p.Args["variant"].(map[string]{})
-						//status, ok := variantMap["stauts"].(int)
-						log.Printf("%v", p.Args)
-						/*if ok {
-							log.Printf("test")
+						variantMap := p.Args["variant"].(map[string]interface{})
+						status, ok := variantMap["status"].(int)
+						if ok {
 							product.Variant.Status = status
-						}*/
+						}
 						topCategory, ok := p.Args["topCategory"].(int)
 						if ok {
 							product.TopCategory = topCategory
@@ -174,7 +140,7 @@ var productMutation = graphql.NewObject(
 
 var schema, _ = graphql.NewSchema(
 	graphql.SchemaConfig{
-		Query: queryType,
+		Query:    queryType,
 		Mutation: productMutation,
 	},
 )
