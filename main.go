@@ -18,7 +18,7 @@ type Variant struct {
 
 type Product struct {
 	Id          int        `json:"id"`
-	Variants    []*Variant `json:"variants"`
+	Variant     *Variant   `json:"variant"`
 	TopCategory int        `json:"topCategory"`
 }
 
@@ -50,8 +50,8 @@ var productType = graphql.NewObject(
 			"id": &graphql.Field{
 				Type: graphql.Int,
 			},
-			"variants": &graphql.Field{
-				Type: graphql.NewList(variantType),
+			"variant": &graphql.Field{
+				Type: variantType,
 			},
 			"topCategory": &graphql.Field{
 				Type: graphql.Int,
@@ -81,10 +81,100 @@ var queryType = graphql.NewObject(
 		},
 	})
 
+/*var variantMutation = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "variantMutation",
+		Fields: graphql.Fields{
+			"variant": &graphql.Field{
+				Type: variantType,
+				Args: graphql.FieldConfigArgument{
+					"id": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+					"status": &graphql.ArgumentConfig{
+						Type: graphql.Int,
+					},
+					"upc": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+					"externalId": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+					"images": &graphql.ArgumentConfig{
+						Type: graphql.NewList(graphql.String),
+					},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					id, ok := p.Args["id"].(string)
+					if ok {
+						product := data[id]
+						status, ok := p.Args["status"].(int)
+						if ok {
+							product.Variant.Status = status
+						}
+						upc, ok := p.Args["upc"].(string)
+						if ok {
+							product.Variant.Upc = upc
+						}
+						externalId, ok := p.Args["externalId"].(string)
+						if ok {
+							product.Variant.ExternalId = externalId
+						}
+						images, ok := p.Args["images"].([]string)
+						if ok {
+							product.Variant.Images = images
+						}
+						return product.Variant, nil
+					}
+					return nil, nil
+				},
+			},
+		},
+	})*/
+
+var productMutation = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "productMutation",
+		Fields: graphql.Fields{
+			"product": &graphql.Field{
+				Type: productType,
+				Args: graphql.FieldConfigArgument{
+					"id": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+					"variant": &graphql.ArgumentConfig{
+						Type: variantType,
+					},
+					"topCategory": &graphql.ArgumentConfig{
+						Type: graphql.Int,
+					},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					id, ok := p.Args["id"].(string)
+					if ok {
+						product := data[id]
+						variant, ok := p.Args["variant"].(Variant)
+						log.Printf("%v", p.Args)
+						if ok {
+							log.Println("variant")
+							product.Variant.Status = variant.Status
+						}
+						topCategory, ok := p.Args["topCategory"].(int)
+						if ok {
+							product.TopCategory = topCategory
+						}
+						return product, nil
+					}
+					return nil, nil
+				},
+			},
+		},
+	})
+
 var schema, _ = graphql.NewSchema(
 	graphql.SchemaConfig{
 		Query: queryType,
-		//Mutation: mutationType,
+		Mutation: productMutation,
 	},
 )
 
