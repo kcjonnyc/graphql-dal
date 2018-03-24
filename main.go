@@ -168,7 +168,7 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 		RequestString: query,
 	})
 	if len(result.Errors) > 0 {
-		fmt.Printf("wrong result, unexpected errors: %v", result.Errors)
+		fmt.Printf("Errors: %v", result.Errors)
 	}
 	return result
 }
@@ -194,6 +194,6 @@ func main() {
 		result := executeQuery(r.URL.Query().Get("query"), schema)
 		json.NewEncoder(w).Encode(result)
 	})
-	fmt.Println("Now server is running on port 8080")
+	fmt.Println("Server is running on port 8080")
 	http.ListenAndServe(":8080", nil)
 }
