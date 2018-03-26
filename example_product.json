@@ -6,8 +6,31 @@
             "status": 1,
             "upc": "184125436A",
             "externalId": "184125436A",
-            "images": []
+            "images": ["https://variant3.jpeg", "https://variant4.jpeg", "https://variant5.jpeg"]
         },
         "topCategory": 1
+    },
+    "90805": {
+        "id": 90805,
+        "variant":
+        {
+            "status": 2,
+            "upc": "18",
+            "externalId": "18",
+            "images": ["https://variant.jpeg", "https://variant2.jpeg"]
+        },
+        "topCategory": 2
+    },
+
+    "90806": {
+        "id": 90806,
+        "variant":
+        {
+            "status": 3,
+            "upc": "184",
+            "externalId": "184",
+            "images": ["https://example.jpeg"]
+        },
+        "topCategory": 3
     }
 }
